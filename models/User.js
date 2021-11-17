@@ -12,8 +12,27 @@ const userSchema = new Schema({
     },
     username: {type: String, required: true, unique: true},
     password: {type: String, required: true, unique: true},
-    first: String,
-    last: String,
+    like: [{type: Schema.Types.ObjectId, ref: 'User'}],
+    dislike: [{type: Schema.Types.ObjectId, ref: 'User'}],
+    likedBy: [{type: Schema.Types.ObjectId, ref: 'User'}],
+    matches: [{match: {type: Schema.Types.ObjectId, ref: 'User'},
+               messages: [{message: String,
+                            sender: String, 
+                           time: String }]}],
+
+    lookingFor: String,
+    interestedIn: String,
+    betweenAges: {min:String, max:String},
+
+
+    age: Number,
+    gender: String,
+    about: String,
+    interests: [{type: String}],
+    photos: [{type: String}],
+    settings: Object,
+    complete: Boolean
+
 }, {
   timestamps: true
 });

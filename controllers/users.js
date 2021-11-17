@@ -7,8 +7,6 @@ const User = require('../models/User');
 const secret = process.env.SECRET;
 
 userRouter.post('/signup', async (req, res) => {
-    console.log('Signup req.body');
-    console.log(req.body);
     const user = new User(req.body);
     try {
         await user.save();
@@ -24,18 +22,14 @@ userRouter.post('/signup', async (req, res) => {
 
 userRouter.post('/login', async (req, res) => {
     try{
-        console.log(req.body);
         const user = await User.findOne({username: req.body.username});
-        console.log(user);
+
         if(!user) res.status(401).json({err: 'Bad Credentials'});
-        console.log('about to compare');
-        console.log(req.body.pw);
-        console.log(user.password);
+     
         let isMatch = bcrypt.compareSync(req.body.pw, user.password)
-            console.log('after compare');
-            console.log(isMatch);
             if(isMatch) {
                 const token = createJWT(user);
+                console.log(token);
                 res.json({token});
                 
             } else {
