@@ -19,7 +19,10 @@ mongoose.connection
   .on("error", (error) => console.log(error));
 
 const User = require('./models/User');
+const Profile = require('./models/User');
 const userController = require('./controllers/users');
+const profileController = require('./controllers/profiles');
+
 
 /////////////////////////////////////////////////////////////////////////////
 //                          Middleware
@@ -29,6 +32,7 @@ app.use(morgan("dev")); // logging
 app.use(express.json()); // parse json bodies
 
 app.use('/', userController);
+app.use('/profile', profileController);
 
 
 /////////////////////////////////////////////////////////////////////////////

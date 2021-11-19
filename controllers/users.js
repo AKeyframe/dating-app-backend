@@ -41,6 +41,8 @@ userRouter.post('/login', async (req, res) => {
     }
 })
 
+userRouter
+
 //////////////////////////////////////////////
 
 
