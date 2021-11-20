@@ -2,18 +2,8 @@ const express = require('express');
 const profileRouter = express.Router();
 const Profile = require('../models/Profile');
 
-
-
-
-
-
-
 //Update Users Profile
 profileRouter.put('/:id', async (req, res) => {
-    console.log('req.params.id')
-    console.log(req.params.id)
-    console.log('req.body')
-    console.log(req.body);
     try {
       
         res.json(

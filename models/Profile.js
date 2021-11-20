@@ -18,9 +18,11 @@ const profileSchema = new Schema({
     interestedIn: String,
     betweenAges: {min:String, max:String},
 
-
+    first: String,
     age: Number,
     gender: String,
+    education: String,
+    job: String,
     about: String,
     interests: [{type: String}],
     photos: [{type: String}],
