@@ -2,6 +2,54 @@ const express = require('express');
 const profileRouter = express.Router();
 const Profile = require('../models/Profile');
 
+
+profileRouter.get('/likedBy/:id', async (req, res) => {
+   
+    //console.log(data);
+    try{
+      res.json(await Profile.findById(req.params.id).populate('interactions.likedBy'))
+    } catch(error){
+      console.log(error)
+    }
+
+});
+
+// Like another user
+profileRouter.put('/like/:id', async (req, res) => {
+  let ownerId = req.body.id
+  Profile.findById(ownerId, (error, user) => {
+      user.interactions.met.push(req.params.id);
+      user.interactions.likes.push(req.params.id);
+      user.save();
+  });
+  
+
+  try {
+    res.json(
+      await Profile.findByIdAndUpdate(req.params.id, {$push: {"interactions.likedBy": ownerId}}, { new: true })
+    );
+  } catch (error) {
+
+    res.status(400).json(error);
+  }
+});
+
+profileRouter.put('/dislike/:id', async (req, res) => {
+  console.log(req.params.id)
+  console.log(req.body) //userId
+  let userId = req.body.id;
+
+  try {
+    res.json(
+      await Profile.findByIdAndUpdate(req.params.id, {$push: {"interactions.met": userId}}, { new: true })
+    );
+  } catch (error) {
+
+    res.status(400).json(error);
+  }
+})
+
+
 //Update Users Profile
 profileRouter.put('/:id', async (req, res) => {
     try {
@@ -14,6 +62,7 @@ profileRouter.put('/:id', async (req, res) => {
         res.status(400).json(error);
       }
 });
+
 
 //Find users based on your prefrences
 profileRouter.get('/:id/users', async (req, res) => {
@@ -38,6 +87,26 @@ profileRouter.get('/:id/users', async (req, res) => {
                 {_id: {$not:{$eq: id}}, age:{$gte:min,$lte:max}});
         }
     }
+
+    console.log('before');
+    console.log(results);
+    prof.interactions.met.forEach((person, i) => {
+      results = results.filter((result, i) => {
+        console.log(result._id)
+        console.log(person)
+        if(result._id.toString() == person.toString()){
+            console.log("true")
+            return;
+        } else {
+          console.log('false')
+          return result;
+        }
+      });
+    });
+
+    console.log('after')
+    console.log(results)
+      
     
         
     try {

@@ -6,13 +6,16 @@ const profileSchema = new Schema({
             required: true,
             unique: true},
             
-    like: [{type: Schema.Types.ObjectId, ref: 'Profile'}],
-    dislike: [{type: Schema.Types.ObjectId, ref: 'Profile'}],
-    likedBy: [{type: Schema.Types.ObjectId, ref: 'Profile'}],
-    matches: [{match: {type: Schema.Types.ObjectId, ref: 'Profile'},
-            messages: [{message: String,
-                            sender: String, 
-                        time: String }]}],
+    
+    interactions: {met: [{type: Schema.Types.ObjectId, ref: 'Profile'}],
+                    likedBy: [{type: Schema.Types.ObjectId, ref: 'Profile'}],
+                    likes: [{type: Schema.Types.ObjectId, ref: 'Profile'}],
+                    matches: [{match: {type: Schema.Types.ObjectId, ref: 'Profile'},
+                                messages: [{message: String,
+                                            sender: String,
+                                            time: Date }]}],
+
+                },
 
     lookingFor: String,
     interestedIn: String,
