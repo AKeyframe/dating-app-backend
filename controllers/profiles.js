@@ -16,28 +16,99 @@ profileRouter.get('/likedBy/:id', async (req, res) => {
 
 // Like another user
 profileRouter.put('/like/:id', async (req, res) => {
-  let ownerId = req.body.id
+  let bothLiked = false;
+  const ownerId = req.body.id;
+  const userId = req.params.id;
+  let pos = 0; 
+
+  //Find the owner and check to see if they were liked by this person
   Profile.findById(ownerId, (error, user) => {
-      user.interactions.met.push(req.params.id);
-      user.interactions.likes.push(req.params.id);
-      user.save();
-  });
+    user.interactions.likedBy.forEach((p, i) => {
+        console.log('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=')
+        console.log(p.toString())
+        console.log(userId)
+        //If they were upate matches instead
+        if(p.toString() == userId){
+            bothLiked=true;
+            pos = i;
+            console.log('match: true')
+        }
+    });
+    if(bothLiked === false){
+        user.interactions.met.push(req.params.id);
+        user.save();
+
+    } else if(bothLiked === true){
+        user.interactions.likedBy.splice(pos, 1);
+        user.interactions.met.push(userId);
+        user.interactions.matches.push({match: userId, messages: []});
+        user.save();
+
+        let pos2 = 0;
+        Profile.findById(userId, ((error, otherUser) => {
+          console.log('~~~~~~~~~~~~~~~~~~')
+          console.log(otherUser);
+          otherUser.interactions.likedBy.forEach((p, i) => {
+            //If they were upate matches instead
+            if(p.toString() == ownerId){
+                pos2 = i;
+                console.log(pos)
+                
+            }
+          });
+
+        otherUser.interactions.likedBy.splice(pos2, 1);
+        otherUser.interactions.matches.push({match: ownerId, messages: []});
+        otherUser.save();
+      
+      })); //otherUser
+    } //else if
+  }); //user
+
+  console.log('bothLiked')
+  console.log(bothLiked)
   
+  if(bothLiked === true){
+   
+    try {
+      res.json(
+        await Profile.findByIdAndUpdate(req.params.id, {$push: {"interactions.matches": {match: ownerId, messages: []}}}, { new: true })
+      );
+    } catch (error) {
 
-  try {
-    res.json(
-      await Profile.findByIdAndUpdate(req.params.id, {$push: {"interactions.likedBy": ownerId}}, { new: true })
-    );
-  } catch (error) {
+      res.status(400).json(error);
 
-    res.status(400).json(error);
-  }
+    } 
+  } else if(bothLiked === false){
+    console.log('if')
+    try {
+      res.json(
+        await Profile.findByIdAndUpdate(req.params.id, {$push: {"interactions.likedBy": ownerId}}, { new: true })
+      );
+    } catch (error) {
+
+      res.status(400).json(error);
+    }
+  } 
+
+
+  
 });
 
 profileRouter.put('/dislike/:id', async (req, res) => {
-  console.log(req.params.id)
-  console.log(req.body) //userId
+  let ownerId = req.params.id;
   let userId = req.body.id;
+
+  Profile.findById(ownerId, (error, user) => {
+      user.interactions.likedBy = user.interactions.likedBy.filter((p, i) => {
+          if(p == userId){
+            return;
+          } else {
+            return p;
+          }
+      });
+      user.save();
+  });
 
   try {
     res.json(
@@ -88,12 +159,9 @@ profileRouter.get('/:id/users', async (req, res) => {
         }
     }
 
-    console.log('before');
-    console.log(results);
+    //Go through and remove anyone the user has interacted with
     prof.interactions.met.forEach((person, i) => {
       results = results.filter((result, i) => {
-        console.log(result._id)
-        console.log(person)
         if(result._id.toString() == person.toString()){
             console.log("true")
             return;
@@ -102,12 +170,7 @@ profileRouter.get('/:id/users', async (req, res) => {
           return result;
         }
       });
-    });
-
-    console.log('after')
-    console.log(results)
-      
-    
+    });    
         
     try {
         res.json(results);  
