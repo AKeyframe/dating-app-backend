@@ -5,7 +5,6 @@ const Profile = require('../models/Profile');
 
 profileRouter.get('/likedBy/:id', async (req, res) => {
    
-    //console.log(data);
     try{
       res.json(await Profile.findById(req.params.id).populate('interactions.likedBy'))
     } catch(error){
@@ -13,6 +12,16 @@ profileRouter.get('/likedBy/:id', async (req, res) => {
     }
 
 });
+
+profileRouter.get('/matches/:id', async (req, res) => {
+
+    try{
+      res.json(await Profile.findById(req.params.id).populate('interactions.matches.match'));
+    } catch(error){
+      console.log(error)
+    }
+})
+
 
 // Like another user
 profileRouter.put('/like/:id', async (req, res) => {
@@ -24,14 +33,10 @@ profileRouter.put('/like/:id', async (req, res) => {
   //Find the owner and check to see if they were liked by this person
   Profile.findById(ownerId, (error, user) => {
     user.interactions.likedBy.forEach((p, i) => {
-        console.log('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=')
-        console.log(p.toString())
-        console.log(userId)
         //If they were upate matches instead
         if(p.toString() == userId){
             bothLiked=true;
             pos = i;
-            console.log('match: true')
         }
     });
     if(bothLiked === false){
@@ -46,14 +51,10 @@ profileRouter.put('/like/:id', async (req, res) => {
 
         let pos2 = 0;
         Profile.findById(userId, ((error, otherUser) => {
-          console.log('~~~~~~~~~~~~~~~~~~')
-          console.log(otherUser);
           otherUser.interactions.likedBy.forEach((p, i) => {
             //If they were upate matches instead
             if(p.toString() == ownerId){
                 pos2 = i;
-                console.log(pos)
-                
             }
           });
 
@@ -64,9 +65,6 @@ profileRouter.put('/like/:id', async (req, res) => {
       })); //otherUser
     } //else if
   }); //user
-
-  console.log('bothLiked')
-  console.log(bothLiked)
   
   if(bothLiked === true){
    
@@ -163,11 +161,9 @@ profileRouter.get('/:id/users', async (req, res) => {
     prof.interactions.met.forEach((person, i) => {
       results = results.filter((result, i) => {
         if(result._id.toString() == person.toString()){
-            console.log("true")
             return;
         } else {
-          console.log('false')
-          return result;
+            return result;
         }
       });
     });    
